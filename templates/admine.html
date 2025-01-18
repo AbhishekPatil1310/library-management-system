@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library</title>
+    <script>
+
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+
+        async function fetchBooks(event) {
+    event.preventDefault();
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/books');
+        const data = await response.json();
+
+        const booksList = document.getElementById('books-list');
+        booksList.innerHTML = '';
+
+        if (data.books && Array.isArray(data.books)) {
+            data.books.forEach(book => {
+                const li = document.createElement('li');
+                li.textContent = `Book_ID: ${book.bookid}, Available: ${book.available}, Title: ${book.booktitle}, Author: ${book.author}, Timestamp: ${book.timestamp}`;
+                booksList.appendChild(li);
+            });
+        } else {
+            booksList.innerHTML = '<li>No books available</li>';
+        }
+    } catch (error) {
+        console.error("Error fetching books:", error);
+        alert("Failed to fetch books.");
+    }
+}
+
+
+        function AddBook(event) {
+            event.preventDefault();
+            const bookData = {
+                bookid: document.getElementById('addBook_id').value,
+                available: document.getElementById('addAvailable').value,
+                booktitle: document.getElementById('addBook_title').value,
+                author: document.getElementById('addAuthor').value,
+                timestamp: document.getElementById('addTimestamp').value
+            };
+            fetch(`${API_BASE_URL}/addBook`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert("Book added successfully!");
+                fetchBooks(); // Refresh the book list
+            })
+            .catch(error => {
+                console.error("Error adding book:", error);
+                alert("Failed to add book.");
+            });
+        }
+
+        function update(event) {
+            event.preventDefault();
+            const info = {
+                bookid: document.getElementById('updateBook_id').value,
+                available: document.getElementById('updateAvailable').value
+            };
+            fetch(`${API_BASE_URL}/updatepa`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(info)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert("Book updated successfully!");
+                fetchBooks(); // Refresh the book list
+            })
+            .catch(error => {
+                console.error("Error updating book:", error);
+                alert("Failed to update book.");
+            });
+        }
+        async function showbook(event) {
+    event.preventDefault();
+    const booktitle = document.getElementById('viewbookname').value;
+    if (!booktitle) {
+        alert("Please enter the book title");
+        return;
+    }
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/api/book?booktitle=${encodeURIComponent(booktitle)}`);
+        const data = await response.json();
+
+        const bookName = document.getElementById('bookName');
+        bookName.innerHTML = '';
+
+        if (data.booknameis) {
+            const li = document.createElement('li');
+            li.textContent = `Book_ID: ${data.booknameis.bookid}, Available: ${data.booknameis.available}, Title: ${data.booknameis.booktitle}, Author: ${data.booknameis.author}, Timestamp: ${data.booknameis.timestamp}`;
+            bookName.appendChild(li);
+        } else if (data.error) {
+            bookName.innerHTML = `<li>${data.error}</li>`;
+        } 
+    } catch (error) {
+        console.error("Error fetching book details:", error);
+        alert("Failed to fetch book details.");
+    }
+}
+async function deletebook(event) {
+        event.preventDefault(); // Prevent form reload
+
+        const booknamehere = document.getElementById('deleteBook_id').value;
+
+        if (!booknamehere) {
+            alert("Please enter a book name");
+            return;
+        }
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/deletElement', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({booknamehere})
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message); // Success message
+            } else {
+                alert(data.error); // Error message
+            }
+        } catch (error) {
+            console.error("Error deleting book:", error);
+            alert("Failed to delete book. Please try again.");
+        }
+    }
+
+
+            
+        
+
+    </script>
+</head>
+<body>
+    <h1>Library</h1>
+    <ul id="books-list"></ul>
+    <form id="addBook">
+        <input type="text" id="addBook_id" placeholder="Book_ID">
+        <input type="text" id="addAvailable" placeholder="Available">
+        <input type="text" id="addBook_title" placeholder="Book_Title">
+        <input type="text" id="addAuthor" placeholder="Author_Name">
+        <input type="text" id="addTimestamp" placeholder="Timestamp">
+        <button type="submit" onclick="AddBook(event)">Add Book</button>
+    </form>
+    <form id="updatepa">
+        <input type="text" id="updateBook_id" placeholder="Book_ID">
+        <input type="text" id="updateAvailable" placeholder="Available">
+        <button type="button" onclick="update(event)">Update Book</button>
+    </form>
+    <form id="viewBookForm">
+        <input type="text" id="viewbookname" placeholder="Enter book title">
+        <button type="submit" onclick="showbook(event)">Get Book Details</button>
+        <button type="button" onclick="fetchBooks(event)">fetch all books</button>
+    </form>
+    <ul id="bookName"></ul>
+    <form id="deletElement">
+        <input type="text" id="deleteBook_id" placeholder="Book_name">
+        <button type="submit" onclick="deletebook(event)">delete</button>
+    </form>
+    
+    
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>student</title>
+    <script>
+           const API_BASE_URL = 'http://127.0.0.1:5000/api';
+
+           async function fetchBooks(event) {
+    event.preventDefault();
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/books');
+        const data = await response.json();
+
+        const booksList = document.getElementById('books-list');
+        booksList.innerHTML = '';
+
+        if (data.books && Array.isArray(data.books)) {
+            data.books.forEach(book => {
+                const li = document.createElement('li');
+                li.textContent = `Book_ID: ${book.bookid}, Available: ${book.available}, Title: ${book.booktitle}, Author: ${book.author}, Timestamp: ${book.timestamp}`;
+                booksList.appendChild(li);
+            });
+        } else {
+            booksList.innerHTML = '<li>No books available</li>';
+        }
+    } catch (error) {
+        console.error("Error fetching books:", error);
+        alert("Failed to fetch books.");
+    }
+}
+async function studentbook(event) {
+    event.preventDefault();
+    const booktitle = document.getElementById('viewbookname').value;
+    if (!booktitle) {
+        alert("Please enter the book title");
+        return;
+    }
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/api/book?booktitle=${encodeURIComponent(booktitle)}`);
+        const data = await response.json();
+
+        const bookName = document.getElementById('bookName');
+        bookName.innerHTML = '';
+
+        if (data.booknameis) {
+            const li = document.createElement('li');
+            li.textContent = `Book_ID: ${data.booknameis.bookid}, Available: ${data.booknameis.available}, Title: ${data.booknameis.booktitle}, Author: ${data.booknameis.author}, Timestamp: ${data.booknameis.timestamp}`;
+            bookName.appendChild(li);
+        } else if (data.error) {
+            bookName.innerHTML = `<li>${data.error}</li>`;
+        } 
+    } catch (error) {
+        console.error("Error fetching book details:", error);
+        alert("Failed to fetch book details.");
+    }
+}
+    </script>
+</head>
+<body>
+    <h1>Library</h1>
+    <ul id="books-list"></ul>
+    <form id="viewBookForm">
+        <input type="text" id="viewbookname" placeholder="Enter book title">
+        <button type="submit" onclick="studentbook(event)">Get Book Details</button>
+        <button type="button" onclick="fetchBooks(event)">fetch all books</button>
+    </form>
+    <ul id="bookName"></ul></body>
+</html>
